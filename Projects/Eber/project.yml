@@ -1,0 +1,28 @@
+targets:
+  Eber:
+    type: application
+    platform: iOS
+    sources:
+      - path: ./Sources
+    dependencies:
+      - sdk: Foundation.framework
+      - sdk: UIKit.framework
+    settings:
+      PRODUCT_NAME: Eber
+      PRODUCT_BUNDLE_IDENTIFIER: $(PRODUCT_NAME)
+      INFOPLIST_FILE: "$(SRCROOT)/Projects/Eber/Supporting Files/Info.plist"
+
+  EberTests:
+    templates: [UnitTest]
+    templateAttributes:
+      testTarget: Eber
+
+schemes:
+  Eber:
+    build:
+      targets:
+        Eber: all
+        EberTests: [test]
+    test:
+      gatherCoverageData: true
+      targets: [EberTests]
