@@ -16,7 +16,17 @@ extension EberNetworking {
   }
 }
 
-final class Networking: MoyaProvider<MultiTarget> {
+protocol NetworkingProtocol {
+  func request(_ target: MultiTarget, file: StaticString, function: StaticString, line: UInt) -> Single<Response>
+}
+
+extension NetworkingProtocol {
+  func request(_ target: MultiTarget, file: StaticString = #file, function: StaticString = #function, line: UInt = #line) -> Single<Response> {
+    return self.request(target, file: file, function: function, line: line)
+  }
+}
+
+final class Networking: MoyaProvider<MultiTarget>, NetworkingProtocol {
   
   init(plugins: [PluginType] = []) {
     let session = MoyaProvider<MultiTarget>.defaultAlamofireSession()
@@ -25,7 +35,7 @@ final class Networking: MoyaProvider<MultiTarget> {
   }
   
   func request(
-    _ target: TargetType,
+    _ target: MultiTarget,
     file: StaticString = #file,
     function: StaticString = #function,
     line: UInt = #line
