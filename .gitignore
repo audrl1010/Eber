@@ -1,4 +1,8 @@
 .DS_Store
 /.build
 /Packages
+/*.xcworkspace
 /*.xcodeproj
+**/xcuserdata
+**/xcshareddata
+Pods/
