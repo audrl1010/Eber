@@ -37,6 +37,7 @@ target 'Eber' do
 
   target 'EberTests' do
     inherit! :search_paths
+    pod 'Stubber'
     pod 'Nimble'
     pod 'Quick'
   end
