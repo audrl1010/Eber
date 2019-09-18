@@ -23,6 +23,9 @@ schemes:
       targets:
         Eber: all
         EberTests: [test]
+    run:
+      environmentVariables:
+        OS_ACTIVITY_MODE: disable
     test:
       gatherCoverageData: true
       targets: [EberTests]
