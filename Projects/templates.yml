@@ -9,7 +9,7 @@ targetTemplates:
     settings:
       PRODUCT_NAME: ${target_name}
       PRODUCT_BUNDLE_IDENTIFIER: $(PRODUCT_NAME)
-      INFOPLIST_FILE: $(SRCROOT)/Projects/Info.plist
+      INFOPLIST_FILE: $(SRCROOT)/Projects/Eber/Supporting Files/Info.plist
     scheme:
       testTargets:
         - ${target_name}Tests
