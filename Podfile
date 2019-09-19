@@ -34,7 +34,8 @@ target 'Eber' do
 
   # Misc
   pod 'Then'
-
+  pod 'KeychainAccess'
+  
   target 'EberTests' do
     inherit! :search_paths
     pod 'Stubber'
