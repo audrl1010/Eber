@@ -8,11 +8,11 @@
 
 import Moya
 
-enum UserAPI {
-  case signIn(userId: String, password: String)
+enum AuthAPI {
+  case authorize(Auth)
 }
 
-extension UserAPI: TargetType {
+extension AuthAPI: TargetType {
   
   var baseURL: URL {
     return EberNetworking.baseURL
@@ -20,29 +20,22 @@ extension UserAPI: TargetType {
   
   var path: String {
     switch self {
-    case .signIn:
+    case .authorize:
       return "/auth"
     }
   }
   
   var method: Method {
     switch self {
-    case .signIn:
+    case .authorize:
       return .post
     }
   }
   
   var task: Task {
     switch self {
-    case let .signIn(userId, password):
-      return .requestParameters(
-        parameters: [
-          "userrId": userId,
-          "password": password,
-          "deviceType": "ios"
-        ],
-        encoding: URLEncoding.default
-      )
+    case let .authorize(auth):
+      return .requestJSONEncodable(auth)
     }
   }
   
