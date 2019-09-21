@@ -16,4 +16,8 @@ final class AuthServiceStub: AuthServiceProtocol {
   func authorize(auth: Auth) -> Single<Void> {
     return Stubber.invoke(authorize, args: auth, default: .never())
   }
+  
+  func signOut() {
+    return Stubber.invoke(signOut, args: Void(), default: Void())
+  }
 }
