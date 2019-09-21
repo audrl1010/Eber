@@ -11,19 +11,21 @@ import KeychainAccess
 protocol AuthServiceProtocol {
   var currentAccessToken: AccessToken? { get }
   func authorize(auth: Auth) -> Single<Void>
+  func signOut()
 }
 
 final class AuthService: AuthServiceProtocol {
   
   private(set) var currentAccessToken: AccessToken?
   
-  private let keychain = Keychain(service: "com.eber.keychain.ios")
+  private let accessTokenStore: AccessTokenStoreProtocol
   
-  private let networking: Networking
+  private let networking: NetworkingProtocol
   
-  init(networking: Networking) {
+  init(networking: NetworkingProtocol, accessTokenStore: AccessTokenStoreProtocol) {
     self.networking = networking
-    self.currentAccessToken = self.loadAccessToken()
+    self.accessTokenStore = accessTokenStore
+    self.currentAccessToken = self.accessTokenStore.loadAccessToken()
     log.debug("currentAccessToken exists: \(self.currentAccessToken != nil)")
   }
   
@@ -32,27 +34,12 @@ final class AuthService: AuthServiceProtocol {
       .map(AccessToken.self)
       .do(onSuccess: { [weak self] accessToken in
         self?.currentAccessToken = accessToken
-        try? self?.saveAccessToken(accessToken)
+        self?.accessTokenStore.saveAccessToken(accessToken)
       })
       .map { _ in }
   }
   
-  private func saveAccessToken(_ accessToken: AccessToken) throws {
-    try self.keychain.set(accessToken.accessToken, key: Keychain.Keys.accessToken)
-  }
-  
-  private func loadAccessToken() -> AccessToken? {
-    guard let accessToken = self.keychain[Keychain.Keys.accessToken] else { return nil }
-    return AccessToken(accessToken: accessToken)
-  }
-  
-  private func deleteAccessToken() {
-    try? self.keychain.remove(Keychain.Keys.accessToken)
-  }
-}
-
-extension Keychain {
-  struct Keys {
-    static let accessToken = "access_token"
+  func signOut() {
+    self.accessTokenStore.deleteAccessToken()
   }
 }
