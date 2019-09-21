@@ -13,7 +13,7 @@ import Quick
 
 @testable import Eber
 
-final class NetwokringStub: NetworkingProtocol {
+final class NetworkingStub: NetworkingProtocol {
   func request(_ target: MultiTarget, file: StaticString, function: StaticString, line: UInt) -> Single<Response> {
     return Stubber.invoke(request, args: (target, file, function, line), default: .error(TestError()))
   }
