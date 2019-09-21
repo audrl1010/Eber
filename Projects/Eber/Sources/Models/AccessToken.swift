@@ -11,7 +11,7 @@ struct AccessToken {
   var accessToken: String
 }
 
-extension AccessToken: Decodable {
+extension AccessToken: Codable {
   enum CodingKeys: String, CodingKey {
     case accessToken = "token"
   }
