@@ -9,6 +9,10 @@ target 'Eber' do
   pod 'ManualLayout'
   pod 'AloeStackView'
   pod 'TouchAreaInsets'
+  pod 'SwiftyColor'
+  pod 'SwiftyImage'
+  pod 'ReusableKit'
+  pod 'CGFloatLiteral'
 
   # DI
   pod 'Pure'
