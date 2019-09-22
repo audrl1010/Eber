@@ -13,4 +13,5 @@ extension UIColor {
   static let black_60: UIColor = 0x000000.color ~ 60%
   static let black_87: UIColor = 0x000000.color ~ 87%
   static let white_87: UIColor = 0xffffff.color ~ 87%
+  static let shamrock: UIColor = 0x00bc45.color
 }
