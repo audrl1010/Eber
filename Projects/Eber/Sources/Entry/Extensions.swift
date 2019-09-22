@@ -6,3 +6,15 @@
 //
 
 import Then
+import SwiftyColor
+import CGFloatLiteral
+import ManualLayout
+import SwiftyImage
+import AloeStackView
+
+extension AloeStackView {
+  open func addRow(_ row: UIView, inset: UIEdgeInsets) {
+    self.addRow(row)
+    self.setInset(forRow: row, inset: inset)
+  }
+}
