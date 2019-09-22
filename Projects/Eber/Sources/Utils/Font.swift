@@ -18,7 +18,7 @@ extension CGFloat {
 
 struct NotoSansCJKKR {
   let size: CGFloat
-  var regular: UIFont { return UIFont(name: "NotoSansCJKkr-Regular", size: self.size)! }
+  var regular: UIFont { return UIFont(name: "NotoSansChakma-Regular", size: self.size)! }
 }
 
 struct AppleSDGothicNeoFont {
