@@ -6,3 +6,4 @@
 **/xcuserdata
 **/xcshareddata
 Pods/
+*.generated.swift
