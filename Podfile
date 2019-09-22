@@ -12,7 +12,7 @@ target 'Eber' do
   pod 'SwiftyColor'
   pod 'SwiftyImage'
   pod 'ReusableKit'
-  pod 'CGFloatLiteral'
+  pod 'URLNavigator'
 
   # DI
   pod 'Pure'
@@ -41,6 +41,7 @@ target 'Eber' do
   pod 'R.swift'
   pod 'Then'
   pod 'KeychainAccess'
+  pod 'CGFloatLiteral'
   
   target 'EberTests' do
     inherit! :search_paths
