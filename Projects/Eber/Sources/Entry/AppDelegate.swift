@@ -16,6 +16,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   
   private override init() {
     self.dependency = AppDependency.resolve()
+    self.window = dependency.window
   }
   
   init(dependency: AppDependency) {
@@ -27,11 +28,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     didFinishLaunchingWithOptions
     launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    let window = UIWindow(frame: UIScreen.main.bounds)
-    window.backgroundColor = .white
-    window.rootViewController = UIViewController()
-    window.makeKeyAndVisible()
-    self.window = window
     return true
   }
 }
