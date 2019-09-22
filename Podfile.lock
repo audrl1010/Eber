@@ -22,6 +22,9 @@ PODS:
   - Pure/Stub (1.1.0):
     - Pure/Core
   - Quick (2.1.0)
+  - R.swift (5.0.3):
+    - R.swift.Library (~> 5.0.0)
+  - R.swift.Library (5.0.1)
   - ReactorKit (2.0.1):
     - RxSwift (~> 5.0)
   - ReusableKit (3.0.0):
@@ -38,6 +41,9 @@ PODS:
     - RxSwift (~> 5.0)
   - RxDataSources (4.0.1):
     - Differentiator (~> 4.0)
+    - RxCocoa (~> 5.0)
+    - RxSwift (~> 5.0)
+  - RxKeyboard (1.0.0):
     - RxCocoa (~> 5.0)
     - RxSwift (~> 5.0)
   - RxOptional (4.0.0):
@@ -68,12 +74,14 @@ DEPENDENCIES:
   - Pure
   - Pure/Stub
   - Quick
+  - R.swift
   - ReactorKit
   - ReusableKit
   - RxBlocking
   - RxCocoa
   - RxCodable
   - RxDataSources
+  - RxKeyboard
   - RxOptional
   - RxSwift
   - RxViewController
@@ -97,12 +105,15 @@ SPEC REPOS:
     - Nimble
     - Pure
     - Quick
+    - R.swift
+    - R.swift.Library
     - ReactorKit
     - ReusableKit
     - RxBlocking
     - RxCocoa
     - RxCodable
     - RxDataSources
+    - RxKeyboard
     - RxOptional
     - RxRelay
     - RxSwift
@@ -126,12 +137,15 @@ SPEC CHECKSUMS:
   Nimble: 622629381bda1dd5678162f21f1368cec7cbba60
   Pure: 45ef8de7c9d923f971c5656583bc6f108699b1fd
   Quick: 4be43f6634acfa727dd106bdf3929ce125ffa79d
+  R.swift: f5a87643b91ea569d23d6afb3eee9c743edde239
+  R.swift.Library: cfe85d569d9bae6cb262922db130e7c3a7a5fad1
   ReactorKit: a63c5e11e0fd32d59d672e54178b0ed2876b764b
   ReusableKit: e5f853ad4652e411f96b6119b2488afa12929be6
   RxBlocking: c67185d26498ea3cbe3e121917c3c16739e43123
   RxCocoa: fcf32050ac00d801f34a7f71d5e8e7f23026dcd8
   RxCodable: 468b37793b66d804a5b1be16e817d7aab408b52b
   RxDataSources: efee07fa4de48477eca0a4611e6d11e2da9c1114
+  RxKeyboard: 6683c4344304a00f943c158bd8a43ce5469c82a7
   RxOptional: 9904e2219d59260c3c171273d475b2126de187e8
   RxRelay: 4f7409406a51a55cd88483f21ed898c234d60f18
   RxSwift: 8b0671caa829a763bbce7271095859121cbd895f
@@ -143,6 +157,6 @@ SPEC CHECKSUMS:
   Then: 0157115e883545c77967b452fe74a1d25fb796e1
   TouchAreaInsets: eb1ad705965a142a30a9c6a3405bec5e46d8613b
 
-PODFILE CHECKSUM: 6f52795b58f27398f2d2281c1cdd1dc971d99447
+PODFILE CHECKSUM: 9d8be94ddf13ddf2efba63763c5643007203d8b3
 
 COCOAPODS: 1.7.5

@@ -29,6 +29,7 @@ target 'Eber' do
   pod 'RxViewController'
   pod 'RxCodable'
   pod 'RxOptional'
+  pod 'RxKeyboard'
   
   # Architecture
   pod 'ReactorKit'
@@ -37,6 +38,7 @@ target 'Eber' do
   pod 'CocoaLumberjack/Swift'
 
   # Misc
+  pod 'R.swift'
   pod 'Then'
   pod 'KeychainAccess'
   
