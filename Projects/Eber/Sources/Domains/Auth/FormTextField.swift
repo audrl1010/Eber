@@ -27,6 +27,12 @@ class PaddingTextField: UITextField {
   }
 }
 
+extension Reactive where Base: FormTextField {
+  var text: ControlProperty<String?> {
+    return self.base.textField.rx.text
+  }
+}
+
 class FormTextField: UIView {
   
   enum Font {

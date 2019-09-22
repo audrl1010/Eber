@@ -20,7 +20,7 @@ class SignInViewReactor: Reactor, FactoryModule {
     case setId(String)
     case setPassword(String)
     case signIn
-    case toggleShouldKeepAuth
+    case toggleShouldKeepAuth(Bool)
   }
   
   enum Mutation {
@@ -28,7 +28,7 @@ class SignInViewReactor: Reactor, FactoryModule {
     case setId(String)
     case setPassword(String)
     case setLoading(Bool)
-    case toggleShouldKeepAuth
+    case toggleShouldKeepAuth(Bool)
   }
   
   struct State {
@@ -37,9 +37,7 @@ class SignInViewReactor: Reactor, FactoryModule {
     var password: String = ""
     var isSignedIn: Bool = false
     var shouldKeepAuth: Bool = true
-    var canSignIn: Bool {
-      return !id.isEmpty && !password.isEmpty
-    }
+    var canSignIn: Bool = false
   }
   
   let initialState: State = State()
@@ -61,9 +59,9 @@ class SignInViewReactor: Reactor, FactoryModule {
       guard !self.currentState.isLoading else { return .empty() }
       return .just(.setPassword(password))
       
-    case .toggleShouldKeepAuth:
+    case let .toggleShouldKeepAuth(shouldKeepAuth):
       guard !self.currentState.isLoading else { return .empty() }
-      return .just(.toggleShouldKeepAuth)
+      return .just(.toggleShouldKeepAuth(shouldKeepAuth))
       
     case .signIn:
       guard !self.currentState.isLoading else { return .empty() }
@@ -95,12 +93,15 @@ class SignInViewReactor: Reactor, FactoryModule {
     case let .setPassword(password):
       newState.password = password
     
-    case let .toggleShouldKeepAuth:
-      newState.shouldKeepAuth = !state.shouldKeepAuth
+    case let .toggleShouldKeepAuth(shouldKeepAuth):
+      newState.shouldKeepAuth = shouldKeepAuth
       
     case .isSignedIn:
       newState.isSignedIn = true
     }
+    
+    newState.canSignIn = !newState.id.isEmpty && !newState.password.isEmpty
+    
     return newState
   }
 }

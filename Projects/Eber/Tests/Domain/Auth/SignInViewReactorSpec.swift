@@ -9,12 +9,12 @@
 import Nimble
 import Quick
 import Stubber
+
 @testable import Eber
 
 final class SignInViewReactorSpec: QuickSpec {
   
   override func spec() {
-    
     func createReactor(authService: AuthServiceStub = .init()) -> SignInViewReactor {
       let factory = SignInViewReactor.Factory.init(dependency: .init(authService: authService))
       return factory.create()
@@ -86,8 +86,8 @@ final class SignInViewReactorSpec: QuickSpec {
     describe("state.shouldKeepAuth") {
       context("when receives an action.toggleShouldKeepAuth") {
         it("is toggled") {
-          reactor.action.onNext(.toggleShouldKeepAuth)
-          expect(reactor.currentState.shouldKeepAuth) == false
+          reactor.action.onNext(.toggleShouldKeepAuth(true))
+          expect(reactor.currentState.shouldKeepAuth) == true
         }
       }
     }

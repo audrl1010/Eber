@@ -11,8 +11,16 @@ import RxSwift
 import RxCocoa
 import RxKeyboard
 import AloeStackView
+import Pure
+import SwiftyColor
 
-final class SignInViewController: BaseViewController {
+final class SignInViewController: BaseViewController, View, FactoryModule {
+
+  typealias Reactor = SignInViewReactor
+
+  struct Payload {
+    let reactor: Reactor
+  }
   
   enum Metric {
     static let logoViewTop = 99.f
@@ -49,8 +57,10 @@ final class SignInViewController: BaseViewController {
     $0.layer.cornerRadius = 4.f
     $0.titleLabel?.font = 16.f.appleSDGothicNeoFont.semibold
     $0.setTitleColor(.white_87, for: .normal)
+    $0.setTitleColor(.white_42, for: .disabled)
     $0.setTitle("로그인", for: .normal)
     $0.setBackgroundImage(UIImage.resizable().color(.shamrock).image, for: .normal)
+    $0.setBackgroundImage(UIImage.resizable().color(.shamrock).image, for: .disabled)
     $0.adjustsImageWhenHighlighted = false
   }
   let findPasswordButton = UIButton().then {
@@ -60,9 +70,19 @@ final class SignInViewController: BaseViewController {
     $0.layer.borderColor = UIColor.black_18.cgColor
     $0.titleLabel?.font = 16.f.appleSDGothicNeoFont.semibold
     $0.setTitleColor(.shamrock, for: .normal)
+    $0.setTitleColor(.shamrock_42, for: .disabled)
     $0.setTitle("비밀번호 찾기", for: .normal)
     $0.setBackgroundImage(UIImage.resizable().color(.white).image, for: .normal)
     $0.adjustsImageWhenHighlighted = false
+  }
+  
+  required init(dependency: Void, payload: Payload) {
+    defer { self.reactor = payload.reactor }
+    super.init()
+  }
+  
+  required convenience init?(coder aDecoder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
   }
   
   override func viewDidLoad() {
@@ -163,6 +183,52 @@ final class SignInViewController: BaseViewController {
           self.view.layoutIfNeeded()
         }
       })
+      .disposed(by: self.disposeBag)
+  }
+  
+  func bind(reactor: Reactor) {
+    self.idFormTextField.rx.text
+      .filterNil()
+      .skip(1)
+      .map(Reactor.Action.setId)
+      .bind(to: reactor.action)
+      .disposed(by: self.disposeBag)
+    
+    reactor.state.map { $0.id }
+      .distinctUntilChanged()
+      .bind(to: self.idFormTextField.rx.text)
+      .disposed(by: self.disposeBag)
+    
+    self.passwordFormTextField.rx.text
+      .filterNil()
+      .skip(1)
+      .map(Reactor.Action.setPassword)
+      .bind(to: reactor.action)
+      .disposed(by: self.disposeBag)
+    
+    reactor.state.map { $0.password }
+      .distinctUntilChanged()
+      .bind(to: self.passwordFormTextField.rx.text)
+      .disposed(by: self.disposeBag)
+    
+    self.keepingLoginFormCheckBox.rx.isOn
+      .skip(1)
+      .map(Reactor.Action.toggleShouldKeepAuth)
+      .bind(to: reactor.action)
+      .disposed(by: self.disposeBag)
+    
+    reactor.state.map { $0.shouldKeepAuth }
+      .distinctUntilChanged()
+      .bind(to: self.keepingLoginFormCheckBox.rx.isOn)
+      .disposed(by: self.disposeBag)
+    
+    reactor.state.map { $0.canSignIn }
+      .bind(to: self.signInButton.rx.isEnabled)
+      .disposed(by: self.disposeBag)
+    
+    self.signInButton.rx.tap
+      .map { Reactor.Action.signIn }
+      .bind(to: reactor.action)
       .disposed(by: self.disposeBag)
   }
 }
