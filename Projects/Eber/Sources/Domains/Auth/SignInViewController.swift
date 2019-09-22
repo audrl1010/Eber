@@ -9,6 +9,7 @@ import UIKit
 import ReactorKit
 import RxSwift
 import RxCocoa
+import RxKeyboard
 import AloeStackView
 
 final class SignInViewController: BaseViewController {
@@ -34,7 +35,6 @@ final class SignInViewController: BaseViewController {
   
   let aloeStackView = AloeStackView().then {
     $0.hidesSeparatorsByDefault = true
-    $0.alwaysBounceVertical = true
   }
   let logoView = UIImageView(image: R.image.eberLogo()).then {
     $0.backgroundColor = .black
@@ -140,5 +140,29 @@ final class SignInViewController: BaseViewController {
     self.findPasswordButton.snp.makeConstraints { make in
       make.height.equalTo(Metric.findPasswordButtonHeight)
     }
+    
+    self.setUpToAdjustInsetWhenKeyboardUpOrDown()
+  }
+  
+  private func setUpToAdjustInsetWhenKeyboardUpOrDown() {
+    let tapGesture = UITapGestureRecognizer()
+    self.view.addGestureRecognizer(tapGesture)
+    tapGesture.rx.event.map { _ in }
+      .subscribe(onNext: { [weak self] in
+        self?.view.endEditing(true)
+      })
+      .disposed(by: self.disposeBag)
+    
+    RxKeyboard.instance.visibleHeight
+      .drive(onNext: { [weak self] keyboardVisibleHeight in
+        guard let self = self else { return }
+        self.view.setNeedsLayout()
+        UIView.animate(withDuration: 0) {
+          self.aloeStackView.contentInset.bottom = keyboardVisibleHeight
+          self.aloeStackView.scrollIndicatorInsets.bottom = self.aloeStackView.contentInset.bottom
+          self.view.layoutIfNeeded()
+        }
+      })
+      .disposed(by: self.disposeBag)
   }
 }
