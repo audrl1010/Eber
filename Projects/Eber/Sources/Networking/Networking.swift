@@ -12,7 +12,7 @@ typealias EberNetworking = Networking
 
 extension EberNetworking {
   static var baseURL: URL {
-    return URL(string: "http://mcricwiojwfb.cleancitynetworks.com/mobile/v1")!
+    return URL(string: "https://mcricwiojwfb.cleancitynetworks.com/mobile/v1")!
   }
 }
 
@@ -42,6 +42,7 @@ final class Networking: MoyaProvider<MultiTarget>, NetworkingProtocol {
   ) -> Single<Response> {
     let requestString = "\(target.method) \(target.path) \(String(describing: target.headers)) \(target.task)"
     return self.rx.request(MultiTarget(target))
+      .filterSuccessfulStatusCodes()
       .do(
         onSuccess: { value in
           let message = "SUCCESS: \(requestString) (\(value.statusCode))"
@@ -69,5 +70,28 @@ final class Networking: MoyaProvider<MultiTarget>, NetworkingProtocol {
           log.debug(message, file: file, function: function, line: line)
         }
       )
+      .catchError {
+        guard let error = $0 as? MoyaError else {
+          return .error(EberClientError.unknown)
+        }
+        if case let .statusCode(status) = error {
+          if status.statusCode == 500 {
+            return .error(EberClientError.serverErrorCode500)
+          }
+          let badRequestResponse = try JSONDecoder().decode(BadRequestResponse.self, from: status.data)
+          return .error(EberClientError.badRequest(badRequestResponse))
+        }
+        guard case let .underlying(value) = error else { return .error(EberClientError.unknown) }
+        let nsError = value.0 as NSError
+        if nsError.code == 13 {
+          return .error(
+            EberClientError.notConnectInternet(
+              code: String(nsError.code),
+              message: nsError.localizedDescription
+            )
+          )
+        }
+        return .error(EberClientError.unknown)
+      }
   }
 }
