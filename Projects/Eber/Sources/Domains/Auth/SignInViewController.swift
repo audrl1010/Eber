@@ -13,6 +13,7 @@ import RxKeyboard
 import AloeStackView
 import Pure
 import SwiftyColor
+import JGProgressHUD
 
 final class SignInViewController: BaseViewController, View, FactoryModule {
 
@@ -41,6 +42,7 @@ final class SignInViewController: BaseViewController, View, FactoryModule {
     static let findPasswordButtonHeight = 48.f
   }
   
+  let progressHUD = JGProgressHUD(style: .extraLight)
   let aloeStackView = AloeStackView().then {
     $0.hidesSeparatorsByDefault = true
   }
@@ -49,8 +51,12 @@ final class SignInViewController: BaseViewController, View, FactoryModule {
     $0.layer.cornerRadius = 4.f
     $0.clipsToBounds = true
   }
-  let idFormTextField = FormTextField(title: "ID")
-  let passwordFormTextField = FormTextField(title: "Password")
+  let idFormTextField = FormTextField(title: "ID").then {
+    $0.textField.autocapitalizationType = .none
+  }
+  let passwordFormTextField = FormTextField(title: "Password").then {
+    $0.textField.isSecureTextEntry = true
+  }
   let keepingLoginFormCheckBox = FormCheckBox(title: "로그인 상태 유지")
   let signInButton = UIButton().then {
     $0.clipsToBounds = true
@@ -187,6 +193,11 @@ final class SignInViewController: BaseViewController, View, FactoryModule {
   }
   
   func bind(reactor: Reactor) {
+    reactor.state.map { $0.isLoading }
+      .distinctUntilChanged()
+      .bind(to: self.progressHUD.rx.animate(in: self.view))
+      .disposed(by: self.disposeBag)
+    
     self.idFormTextField.rx.text
       .filterNil()
       .skip(1)
