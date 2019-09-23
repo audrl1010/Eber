@@ -14,8 +14,9 @@ class SignInViewReactor: Reactor, FactoryModule {
 
   struct Dependency {
     let authService: AuthServiceProtocol
+    let alertService: AlertServiceProtocol
   }
-
+  
   enum Action {
     case setId(String)
     case setPassword(String)
@@ -79,6 +80,14 @@ class SignInViewReactor: Reactor, FactoryModule {
     return self.dependency.authService.authorize(auth: auth)
       .asObservable()
       .map { _ in .isSignedIn }
+      .catchError(self.errorMutation)
+  }
+  
+  private func errorMutation(error: Error) -> Observable<Mutation> {
+    guard let clientError = error as? EberClientError else { return .empty() }
+    return self.dependency.alertService
+      .show(alert: NetworkingAlert(clientError: clientError))
+      .flatMap { _ -> Observable<Mutation> in .empty() }
   }
   
   func reduce(state: State, mutation: Mutation) -> State {
