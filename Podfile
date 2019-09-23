@@ -13,6 +13,7 @@ target 'Eber' do
   pod 'SwiftyImage'
   pod 'ReusableKit'
   pod 'URLNavigator'
+  pod 'JGProgressHUD'
 
   # DI
   pod 'Pure'
@@ -33,7 +34,7 @@ target 'Eber' do
   
   # Architecture
   pod 'ReactorKit'
-
+  
   # Logger
   pod 'CocoaLumberjack/Swift'
 
@@ -42,7 +43,7 @@ target 'Eber' do
   pod 'Then'
   pod 'KeychainAccess'
   pod 'CGFloatLiteral'
-  
+
   target 'EberTests' do
     inherit! :search_paths
     pod 'RxBlocking'
