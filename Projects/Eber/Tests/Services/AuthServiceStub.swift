@@ -11,7 +11,7 @@ import Stubber
 @testable import Eber
 
 final class AuthServiceStub: AuthServiceProtocol {
-  var currentAccessToken: AccessToken? { return nil }
+  var currentAccessToken: AccessToken? = nil
   
   func authorize(auth: Auth) -> Single<Void> {
     return Stubber.invoke(authorize, args: auth, default: .never())
