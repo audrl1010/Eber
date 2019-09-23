@@ -14,8 +14,10 @@ import Quick
 
 final class SignInViewControllerSpec: QuickSpec {
   override func spec() {
-    func createReactor(authService: AuthServiceStub = .init()) -> SignInViewReactor {
-      let factory = SignInViewReactor.Factory.init(dependency: .init(authService: authService))
+    func createReactor(authService: AuthServiceStub = .init(), alertService: AlertServiceStub = .init()) -> SignInViewReactor {
+      let factory = SignInViewReactor.Factory.init(
+        dependency: .init(authService: authService, alertService: alertService)
+      )
       return factory.create()
     }
     
