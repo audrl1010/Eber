@@ -54,6 +54,7 @@ class CheckBox: UIButton {
   
   @objc private func didTouchUpInside() {
     self.isOn = !self.isOn
+    self.sendActions(for: .valueChanged)
   }
   
   private func toggleIsOnImage() {
