@@ -10,7 +10,7 @@ import KeychainAccess
 
 protocol AuthServiceProtocol {
   var currentAccessToken: AccessToken? { get }
-  func authorize(auth: Auth) -> Single<Void>
+  func authorize(auth: Auth, shouldPreserveAccessToken: Bool) -> Single<AccessToken>
   func signOut()
 }
 
@@ -29,17 +29,19 @@ final class AuthService: AuthServiceProtocol {
     log.debug("currentAccessToken exists: \(self.currentAccessToken != nil)")
   }
   
-  func authorize(auth: Auth) -> Single<Void> {
+  func authorize(auth: Auth, shouldPreserveAccessToken: Bool) -> Single<AccessToken> {
     return self.networking.request(.target(AuthAPI.authorize(auth)))
-      .map(AccessToken.self)
+      .map(AccessToken.self, atKeyPath: "data")
       .do(onSuccess: { [weak self] accessToken in
         self?.currentAccessToken = accessToken
-        self?.accessTokenStore.saveAccessToken(accessToken)
+        if shouldPreserveAccessToken {
+          self?.accessTokenStore.saveAccessToken(accessToken)
+        }
       })
-      .map { _ in }
   }
   
   func signOut() {
+    self.currentAccessToken = nil
     self.accessTokenStore.deleteAccessToken()
   }
 }

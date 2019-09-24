@@ -13,8 +13,8 @@ import Stubber
 final class AuthServiceStub: AuthServiceProtocol {
   var currentAccessToken: AccessToken? = nil
   
-  func authorize(auth: Auth) -> Single<Void> {
-    return Stubber.invoke(authorize, args: auth, default: .never())
+  func authorize(auth: Auth, shouldPreserveAccessToken: Bool) -> Single<AccessToken> {
+    return Stubber.invoke(authorize, args: (auth, shouldPreserveAccessToken), default: .never())
   }
   
   func signOut() {
