@@ -15,6 +15,17 @@ import Pure
 import SwiftyColor
 import JGProgressHUD
 
+extension Reactive where Base: SignInViewController {
+  var signInStatus: ControlEvent<SignInStatus> {
+    guard let reactor = self.base.reactor else {
+      fatalError("reactor is not connected to \(self)")
+    }
+    let source = reactor.state.map { $0.signInStatus }
+      .distinctUntilChanged()
+    return ControlEvent(events: source)
+  }
+}
+
 final class SignInViewController: BaseViewController, View, FactoryModule {
 
   typealias Reactor = SignInViewReactor
