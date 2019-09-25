@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Vehicle: Decodable {
+struct Vehicle: Codable {
   var vehicleIdx: Int
   var description: String
   var favorite: Bool
