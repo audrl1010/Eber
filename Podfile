@@ -43,6 +43,7 @@ target 'Eber' do
   pod 'Then'
   pod 'KeychainAccess'
   pod 'CGFloatLiteral'
+  pod 'UICollectionViewFlexLayout'
 
   target 'EberTests' do
     inherit! :search_paths
