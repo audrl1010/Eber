@@ -10,6 +10,26 @@ import RxCocoa
 import Pure
 import ReactorKit
 
+enum SignInStatus {
+  case signedIn(AccessToken)
+  case unsignedIn
+}
+
+extension SignInStatus: Equatable {
+  static func == (lhs: SignInStatus, rhs: SignInStatus) -> Bool {
+    switch (lhs, rhs) {
+    case let (.signedIn(a), .signedIn(b)):
+      return a.accessToken == b.accessToken
+      
+    case (.unsignedIn, .unsignedIn):
+      return true
+      
+    default:
+      return false
+    }
+  }
+}
+
 class SignInViewReactor: Reactor, FactoryModule {
 
   struct Dependency {
@@ -25,7 +45,7 @@ class SignInViewReactor: Reactor, FactoryModule {
   }
   
   enum Mutation {
-    case isSignedIn
+    case setSignInStatus(SignInStatus)
     case setId(String)
     case setPassword(String)
     case setLoading(Bool)
@@ -36,7 +56,7 @@ class SignInViewReactor: Reactor, FactoryModule {
     var isLoading: Bool = false
     var id: String = ""
     var password: String = ""
-    var isSignedIn: Bool = false
+    var signInStatus: SignInStatus = .unsignedIn
     var shouldKeepAuth: Bool = true
     var canSignIn: Bool = false
   }
@@ -77,10 +97,13 @@ class SignInViewReactor: Reactor, FactoryModule {
   
   private func signInMutation() -> Observable<Mutation> {
     let auth = Auth(id: self.currentState.id, password: self.currentState.password)
-    return self.dependency.authService.authorize(auth: auth)
-      .asObservable()
-      .map { _ in .isSignedIn }
-      .catchError(self.errorMutation)
+    return self.dependency.authService.authorize(
+      auth: auth,
+      shouldPreserveAccessToken: self.currentState.shouldKeepAuth
+    )
+    .asObservable()
+    .map { accessToken in .setSignInStatus(.signedIn(accessToken)) }
+    .catchError(self.errorMutation)
   }
   
   private func errorMutation(error: Error) -> Observable<Mutation> {
@@ -105,8 +128,8 @@ class SignInViewReactor: Reactor, FactoryModule {
     case let .toggleShouldKeepAuth(shouldKeepAuth):
       newState.shouldKeepAuth = shouldKeepAuth
       
-    case .isSignedIn:
-      newState.isSignedIn = true
+    case let .setSignInStatus(signInStatus):
+      newState.signInStatus = signInStatus
     }
     
     newState.canSignIn = !newState.id.isEmpty && !newState.password.isEmpty

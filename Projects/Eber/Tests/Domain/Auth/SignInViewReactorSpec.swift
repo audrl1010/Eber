@@ -46,7 +46,7 @@ final class SignInViewReactorSpec: QuickSpec {
         expect(reactor.currentState.password).to(beEmpty())
       }
       it("is not signed in") {
-        expect(reactor.currentState.isSignedIn) == false
+        expect(reactor.currentState.signInStatus) == .unsignedIn
       }
       it("should keep auth") {
         expect(reactor.currentState.shouldKeepAuth) == true
@@ -59,7 +59,7 @@ final class SignInViewReactorSpec: QuickSpec {
     context("when receives an action.login") {
       it("tries to login") {
         Stubber.register(authService.authorize) { auth in
-          return .just(())
+          return .just(AccessTokenFixture.accessToken)
         }
         sendActionSetIdPassword(to: reactor)
         reactor.action.onNext(.signIn)
@@ -106,7 +106,9 @@ final class SignInViewReactorSpec: QuickSpec {
       
       context("when finished authorizing") {
         it("is not loading") {
-          Stubber.register(authService.authorize) { auth in .just(()) }
+          Stubber.register(authService.authorize) { auth in
+            .just(AccessTokenFixture.accessToken)
+          }
           sendActionSetIdPassword(to: reactor)
           reactor.action.onNext(.signIn)
           expect(reactor.currentState.isLoading) == false
@@ -140,19 +142,21 @@ final class SignInViewReactorSpec: QuickSpec {
     describe("state.isSignedIn") {
       context("when succeeds to authorize") {
         it("is signed in") {
-          Stubber.register(authService.authorize) { auth in .just(()) }
+          Stubber.register(authService.authorize) { auth in
+            .just(AccessTokenFixture.accessToken)
+          }
           sendActionSetIdPassword(to: reactor)
           reactor.action.onNext(.signIn)
-          expect(reactor.currentState.isSignedIn) == true
+          expect(reactor.currentState.signInStatus) == .signedIn(AccessTokenFixture.accessToken)
         }
       }
       
       context("when fails to authorize") {
         it("is not signed in") {
-          Stubber.register(authService.authorize) { auth in .error(TestError())}
+          Stubber.register(authService.authorize) { auth in .error(TestError()) }
           sendActionSetIdPassword(to: reactor)
           reactor.action.onNext(.signIn)
-          expect(reactor.currentState.isSignedIn) == false
+          expect(reactor.currentState.signInStatus) == .unsignedIn
         }
       }
     }
