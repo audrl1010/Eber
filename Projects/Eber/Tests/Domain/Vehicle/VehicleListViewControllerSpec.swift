@@ -55,5 +55,20 @@ final class VehicleListViewControllerSpec: QuickSpec {
         }
       }
     }
+    
+    describe("a activityIndicatorView") {
+      context("when loading state") {
+        it("is animating") {
+          reactor.stub.state.value.isLoading = true
+          expect(viewController.activityIndicatorView.isAnimating) == true
+        }
+      }
+      context("when not loading state") {
+        it("is not animating") {
+          reactor.stub.state.value.isLoading = false
+          expect(viewController.activityIndicatorView.isAnimating) == false
+        }
+      }
+    }
   }
 }
