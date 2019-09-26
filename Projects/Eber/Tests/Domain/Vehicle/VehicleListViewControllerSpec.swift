@@ -70,5 +70,17 @@ final class VehicleListViewControllerSpec: QuickSpec {
         }
       }
     }
+    
+    context("when sections have vehicles") {
+      it("has vehicle cells") {
+        let cellReactorFactory = VehicleCellReactor.Factory(dependency: .init())
+        let sectionItems = [VehicleFixture.vehicle1, VehicleFixture.vehicle2]
+          .map(cellReactorFactory.create)
+          .map(VehicleListViewSection.Item.init)
+        reactor.stub.state.value.sections = [VehicleListViewSection(items: sectionItems)]
+        expect(viewController.collectionView.cell(VehicleCell.self, at: 0, 0)?.reactor) === sectionItems[0].cellReactor
+        expect(viewController.collectionView.cell(VehicleCell.self, at: 0, 1)?.reactor) === sectionItems[1].cellReactor
+      }
+    }
   }
 }

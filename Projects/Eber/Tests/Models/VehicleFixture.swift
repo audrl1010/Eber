@@ -16,4 +16,11 @@ enum VehicleFixture {
     licenseNumber: "99-1102-333",
     capacity: 2
   )
+  static let vehicle2 = Vehicle(
+    vehicleIdx: 99,
+    description: "vehicle2",
+    favorite: false,
+    licenseNumber: "32-4562-423",
+    capacity: 10
+  )
 }
