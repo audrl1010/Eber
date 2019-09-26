@@ -16,6 +16,7 @@ import AloeStackView
 import RxSwift
 import RxCocoa
 import JGProgressHUD
+import UICollectionViewFlexLayout
 
 extension AloeStackView {
   open func addRow(_ row: UIView, inset: UIEdgeInsets) {
@@ -32,3 +33,13 @@ extension Reactive where Base: JGProgressHUD {
     }
   }
 }
+
+extension Reactive where Base: UIView {
+  var setNeedsLayout: Binder<Void> {
+    return Binder(self.base) { view, _ in
+      view.setNeedsLayout()
+    }
+  }
+}
+
+extension RxCollectionViewDelegateProxy: UICollectionViewDelegateFlexLayout {}
