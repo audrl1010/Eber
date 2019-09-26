@@ -21,6 +21,7 @@ class BaseCollectionReusableView: UICollectionReusableView {
   override init(frame: CGRect) {
     super.init(frame: frame)
   }
+  
   required convenience init?(coder aDecoder: NSCoder) {
     self.init(frame: .zero)
   }
