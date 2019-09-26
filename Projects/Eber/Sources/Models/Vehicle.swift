@@ -12,5 +12,5 @@ struct Vehicle: Codable {
   var description: String
   var favorite: Bool
   var licenseNumber: String
-  var capacity: Double // L unit
+  var capacity: Int // L unit
 }
