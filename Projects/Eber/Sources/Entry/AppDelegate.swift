@@ -16,7 +16,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   
   private override init() {
     self.dependency = AppDependency.resolve()
-    self.window = dependency.window
   }
   
   init(dependency: AppDependency) {
@@ -28,6 +27,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     didFinishLaunchingWithOptions
     launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    self.window = self.dependency.window
+    self.dependency.appCoordinator.start()
     return true
   }
 }

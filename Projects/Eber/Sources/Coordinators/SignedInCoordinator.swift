@@ -14,6 +14,7 @@ final class SignedInCoordinator: ViewCoordinator<NoRoute>, FactoryModule {
   
   struct Dependency {
     let vehicleListViewControllerFactory: VehicleListViewController.Factory
+    let vehicleListViewReactorFactory: VehicleListViewReactor.Factory
   }
   
   struct Payload {
@@ -29,7 +30,10 @@ final class SignedInCoordinator: ViewCoordinator<NoRoute>, FactoryModule {
   required init(dependency: Dependency, payload: Payload) {
     self.dependency = dependency
     self.accessToken = payload.accessToken
-    self.vehicleListViewController = self.dependency.vehicleListViewControllerFactory.create(payload: .init())
+    let vehicleListViewReactor = self.dependency.vehicleListViewReactorFactory.create()
+    self.vehicleListViewController = self.dependency.vehicleListViewControllerFactory.create(
+      payload: .init(reactor: vehicleListViewReactor)
+    )
     super.init(rootViewController: self.vehicleListViewController)
   }
   
