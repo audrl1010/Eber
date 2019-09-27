@@ -20,7 +20,7 @@ final class SignedOutCoordinator: ViewCoordinator<NoRoute>, FactoryModule {
   private let dependency: Dependency
   
   private var signInViewController: SignInViewController!
-
+  
   var result: Observable<AccessToken> {
     return self.resultRelay.asObservable()
   }

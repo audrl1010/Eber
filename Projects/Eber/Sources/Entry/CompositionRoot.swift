@@ -35,9 +35,18 @@ extension AppDependency {
       dependency: .init(authService: authService)
     )
     
+    
+    let favoriteButtonViewReactorFactory = VehicleFavoriteButtonViewReactor.Factory(
+      dependency: .init(
+        vehicleService: vehicleService,
+        alertService: alertService
+      )
+    )
     let vehicleListViewControllerFactory = VehicleListViewController.Factory()
     let vehicleCellReactorFactory = VehicleCellReactor.Factory(
-      dependency: .init()
+      dependency: .init(
+        favoriteButtonViewReactorFactory: favoriteButtonViewReactorFactory
+      )
     )
     let vehicleListViewReactorFactory = VehicleListViewReactor.Factory(
       dependency: VehicleListViewReactor.Dependency(
