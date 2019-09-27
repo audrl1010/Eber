@@ -17,6 +17,8 @@ import RxSwift
 import RxCocoa
 import JGProgressHUD
 import UICollectionViewFlexLayout
+import SwiftyAttributes
+import TouchAreaInsets
 
 extension AloeStackView {
   open func addRow(_ row: UIView, inset: UIEdgeInsets) {
