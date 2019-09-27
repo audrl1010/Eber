@@ -5,10 +5,23 @@ targets:
     sources:
       - path: ./Sources
       - path: ./Resources
+      - path: ./Resources/R.generated.swift
+        optional: true
 
     dependencies:
       - sdk: Foundation.framework
       - sdk: UIKit.framework
+
+    preBuildScripts:
+      - path: /bin/sh
+        name: Run R.swift
+        inputFiles:
+          - $TEMP_DIR/rswift-lastrun
+        outputFiles:
+          - $SRCROOT/Projects/Eber/Resources/R.generated.swift
+        script: |
+          "$PODS_ROOT/R.swift/rswift" generate "$SRCROOT/Projects/Eber/Resources/R.generated.swift"
+
     settings:
       PRODUCT_NAME: Eber
       PRODUCT_BUNDLE_IDENTIFIER: $(PRODUCT_NAME)
