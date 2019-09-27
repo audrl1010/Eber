@@ -44,7 +44,8 @@ target 'Eber' do
   pod 'KeychainAccess'
   pod 'CGFloatLiteral'
   pod 'UICollectionViewFlexLayout'
-
+  pod 'SwiftyAttributes'
+  
   target 'EberTests' do
     inherit! :search_paths
     pod 'RxBlocking'
