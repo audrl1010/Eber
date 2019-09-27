@@ -14,4 +14,12 @@ final class VehicleServiceStub: VehicleServiceProtocol {
   func vehicles() -> Single<[Vehicle]> {
     return Stubber.invoke(vehicles, args: (), default: .never())
   }
+  
+  func favorite(vehicleIdx: Int) -> Single<Void> {
+    return Stubber.invoke(favorite, args: vehicleIdx, default: .never())
+  }
+  
+  func unfavorite(vehicleIdx: Int) -> Single<Void> {
+    return Stubber.invoke(unfavorite, args: vehicleIdx, default: .never())
+  }
 }
