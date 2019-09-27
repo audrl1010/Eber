@@ -11,9 +11,13 @@ import Pure
 
 class VehicleCellReactor: Reactor, FactoryModule {
   
-  typealias Action = NoAction
+  enum Action {
+    case toggle
+  }
   
-  struct Dependency {}
+  struct Dependency {
+    let favoriteButtonViewReactorFactory: VehicleFavoriteButtonViewReactor.Factory
+  }
   
   struct Payload {
     let vehicle: Vehicle
@@ -24,20 +28,32 @@ class VehicleCellReactor: Reactor, FactoryModule {
     var favorite: Bool
     var licenseNumber: String
     var capacity: String
+    
+    fileprivate var vehicle: Vehicle
   }
   
   let initialState: State
   
+  var vehicle: Vehicle {
+    return self.currentState.vehicle
+  }
+  
   private let dependency: Dependency
+  
+  let favoriteButtonViewReactor: VehicleFavoriteButtonViewReactor
   
   required init(dependency: Dependency, payload: Payload) {
     defer { _ = self.state }
     self.dependency = dependency
+    self.favoriteButtonViewReactor = self.dependency.favoriteButtonViewReactorFactory.create(
+      payload: .init(vehicle: payload.vehicle)
+    )
     self.initialState = State(
       description: payload.vehicle.description,
       favorite: payload.vehicle.favorite,
       licenseNumber: payload.vehicle.licenseNumber,
-      capacity: payload.vehicle.capacity.toDecimal()
+      capacity: payload.vehicle.capacity.toDecimal(),
+      vehicle: payload.vehicle
     )
   }
 }

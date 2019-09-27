@@ -11,18 +11,23 @@ import Quick
 
 final class VehicleCellSpec: QuickSpec {
   override func spec() {
-    func createCellReactor(vehicle: Vehicle = VehicleFixture.vehicle1) -> VehicleCellReactor {
-      let factory = VehicleCellReactor.Factory(
-        dependency: .init()
-      )
-      return factory.create(payload: .init(vehicle: vehicle))
-    }
-    
     var reactor: VehicleCellReactor!
     var cell: VehicleCell!
     
     beforeEach {
-      reactor = createCellReactor(vehicle: VehicleFixture.vehicle1)
+      let vehicleService = VehicleServiceStub()
+      let alertService = AlertServiceStub()
+      
+      let buttonViewReactorFactory = VehicleFavoriteButtonViewReactor.Factory.stub(
+        vehicleService: vehicleService,
+        alertService: alertService
+      )
+      let factory = VehicleCellReactor.Factory.stub(
+        vehicleService: vehicleService,
+        alertService: alertService,
+        favoriteButtonViewReactorFactory: buttonViewReactorFactory
+      )
+      reactor = factory.create(payload: .init(vehicle: VehicleFixture.vehicle1))
       reactor.isStubEnabled = true
       cell = VehicleCell()
       cell.reactor = reactor
@@ -31,7 +36,7 @@ final class VehicleCellSpec: QuickSpec {
     it("has subviews") {
       expect(cell.descriptionLabel.superview) === cell.contentView
       expect(cell.capacityLabel.superview) === cell.contentView
-      expect(cell.favoriteImageView.superview) === cell.contentView
+      expect(cell.favoriteButtonView.superview) === cell.contentView
       expect(cell.licenseNumberLabel.superview) === cell.contentView
     }
   }

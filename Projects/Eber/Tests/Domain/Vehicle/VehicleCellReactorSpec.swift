@@ -13,15 +13,21 @@ import Nimble
 class VehicleCellReactorSpec: QuickSpec {
   
   override func spec() {
-    func createReactor(vehicleService: VehicleServiceStub = .init()) -> VehicleCellReactor {
-      let factory = VehicleCellReactor.Factory.init(dependency: .init())
-      return factory.create(payload: .init(vehicle: VehicleFixture.vehicle1))
-    }
-    
     var reactor: VehicleCellReactor!
     
     beforeEach {
-      reactor = createReactor()
+      let vehicleService = VehicleServiceStub()
+      let alertService = AlertServiceStub()
+      let favoriteButtonViewReactorFactory = VehicleFavoriteButtonViewReactor.Factory.stub(
+        vehicleService: vehicleService,
+        alertService: alertService
+      )
+      let cellReactorFactory = VehicleCellReactor.Factory.stub(
+        vehicleService: vehicleService,
+        alertService: alertService,
+        favoriteButtonViewReactorFactory: favoriteButtonViewReactorFactory
+      )
+      reactor = cellReactorFactory.create(payload: .init(vehicle: VehicleFixture.vehicle1))
     }
     
     describe("state.description") {

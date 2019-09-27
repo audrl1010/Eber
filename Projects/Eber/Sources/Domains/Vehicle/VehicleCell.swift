@@ -8,14 +8,14 @@
 import UIKit
 import ReactorKit
 
+
 final class VehicleCell: BaseCollectionViewCell, View {
 
   typealias CellReactor = VehicleCellReactor
   
   enum Metric {
     static let licenseNumberLabelTop = 9.f
-    static let favoriteImageViewTop = 8.f
-    static let favoriteImageViewSize = 17.f
+    static let favoriteButtonViewTop = 8.f
     static let capacityLabelTop = 10.f
     static let capacityLabelLeft = 8.f
   }
@@ -36,23 +36,23 @@ final class VehicleCell: BaseCollectionViewCell, View {
     $0.font = Font.licenseNumberLabel
     $0.textColor = .black_87
   }
-  let favoriteImageView = UIImageView(image: R.image.favorite()).then {
-    $0.contentMode = .scaleAspectFill
-    $0.clipsToBounds = true
-  }
+  let favoriteButtonView = VehicleFavoriteButtonView()
   let capacityLabel = UILabel().then {
     $0.font = Font.capacityLabel
     $0.textColor = .black_60
   }
+  
+  private let tapGestureRecognizer = UITapGestureRecognizer()
   
   // MARK: Initializing
   
   override init(frame: CGRect) {
     super.init(frame: frame)
     self.contentView.addSubview(self.descriptionLabel)
-    self.contentView.addSubview(self.favoriteImageView)
+    self.contentView.addSubview(self.favoriteButtonView)
     self.contentView.addSubview(self.licenseNumberLabel)
     self.contentView.addSubview(self.capacityLabel)
+    self.contentView.addGestureRecognizer(self.tapGestureRecognizer)
   }
   
   required init?(coder aDecoder: NSCoder) {
@@ -62,6 +62,8 @@ final class VehicleCell: BaseCollectionViewCell, View {
   // MARK: Configuring
   
   func bind(reactor: CellReactor) {
+    self.favoriteButtonView.reactor = reactor.favoriteButtonViewReactor
+    
     reactor.state.map { _ in }
     .bind(to: self.rx.setNeedsLayout)
     .disposed(by: self.disposeBag)
@@ -70,11 +72,6 @@ final class VehicleCell: BaseCollectionViewCell, View {
       .distinctUntilChanged()
       .bind(to: self.descriptionLabel.rx.text)
       .disposed(by: self.disposeBag)
-    
-//    reactor.state.map { $0.favorite }
-//      .distinctUntilChanged()
-//      .bind(to: self.favoriteImageView)
-//      .disposed(by: self.disposeBag)
     
     reactor.state.map { $0.licenseNumber }
       .distinctUntilChanged()
@@ -106,13 +103,12 @@ final class VehicleCell: BaseCollectionViewCell, View {
     self.licenseNumberLabel.top = self.descriptionLabel.bottom + Metric.licenseNumberLabelTop
     self.licenseNumberLabel.width = self.bounds.width
     
-    self.favoriteImageView.top = self.licenseNumberLabel.bottom + Metric.favoriteImageViewTop
-    self.favoriteImageView.width = Metric.favoriteImageViewSize
-    self.favoriteImageView.height = Metric.favoriteImageViewSize
+    self.favoriteButtonView.sizeToFit()
+    self.favoriteButtonView.top = self.licenseNumberLabel.bottom + Metric.favoriteButtonViewTop
     
     self.capacityLabel.sizeToFit()
     self.capacityLabel.top = self.licenseNumberLabel.bottom + Metric.capacityLabelTop
-    self.capacityLabel.left = self.favoriteImageView.right + Metric.capacityLabelLeft
+    self.capacityLabel.left = self.favoriteButtonView.right + Metric.capacityLabelLeft
     self.capacityLabel.width = self.bounds.width - self.capacityLabel.left
   }
   
