@@ -14,28 +14,31 @@ import Quick
 
 final class VehicleListViewControllerSpec: QuickSpec {
   override func spec() {
-    func createReactor(
-      vehicleService: VehicleServiceStub = .init(),
-      alertService: AlertServiceStub = .init()
-    ) -> VehicleListViewReactor {
-      let cellReactorFactory = VehicleCellReactor.Factory(
-        dependency: .init()
+    var cellReactorFactory: VehicleCellReactor.Factory!
+    var reactor: VehicleListViewReactor!
+    var viewController: VehicleListViewController!
+    
+    beforeEach {
+      let vehicleService = VehicleServiceStub()
+      let alertService = AlertServiceStub()
+      
+      let buttonViewReactorFactory = VehicleFavoriteButtonViewReactor.Factory.stub(
+        vehicleService: vehicleService,
+        alertService: alertService
       )
-      let factory = VehicleListViewReactor.Factory.init(
+      cellReactorFactory = VehicleCellReactor.Factory.stub(
+        vehicleService: vehicleService,
+        alertService: alertService,
+        favoriteButtonViewReactorFactory: buttonViewReactorFactory
+      )
+      let factory = VehicleListViewReactor.Factory(
         dependency: .init(
           vehicleService: vehicleService,
           alertService: alertService,
           cellReactorFactory: cellReactorFactory
         )
       )
-      return factory.create()
-    }
-    
-    var reactor: VehicleListViewReactor!
-    var viewController: VehicleListViewController!
-    
-    beforeEach {
-      reactor = createReactor()
+      reactor = factory.create()
       reactor.isStubEnabled = true
       let vehicleListViewControllerFactory = VehicleListViewController.Factory(dependency: ())
       viewController = vehicleListViewControllerFactory.create(payload: .init(reactor: reactor))
@@ -48,6 +51,23 @@ final class VehicleListViewControllerSpec: QuickSpec {
           expect(reactor.stub.actions.last).to(match) {
             if case .refresh = $0 {
               return true
+            } else {
+              return false
+            }
+          }
+        }
+      }
+    }
+    
+    describe("a searchBarView") {
+      context("when inputting") {
+        it("sends a updateQuery action") {
+          let query = "vehicle"
+          viewController.searchBarView.textField.text = query
+          viewController.searchBarView.textField.sendActions(for: .editingChanged)
+          expect(reactor.stub.actions.last).to(match) {
+            if case let .updateQuery(queryToUpdate) = $0 {
+              return query == queryToUpdate
             } else {
               return false
             }
@@ -73,7 +93,6 @@ final class VehicleListViewControllerSpec: QuickSpec {
     
     context("when sections have vehicles") {
       it("has vehicle cells") {
-        let cellReactorFactory = VehicleCellReactor.Factory(dependency: .init())
         let sectionItems = [VehicleFixture.vehicle1, VehicleFixture.vehicle2]
           .map(cellReactorFactory.create)
           .map(VehicleListViewSection.Item.init)

@@ -7,11 +7,13 @@
 
 import UIKit
 import RxSwift
+import RxCocoa
 import Pure
 import ReusableKit
 import ReactorKit
 import UICollectionViewFlexLayout
 import RxDataSources
+import RxKeyboard
 
 final class VehicleListViewController: BaseViewController, View, FactoryModule {
   
@@ -27,6 +29,7 @@ final class VehicleListViewController: BaseViewController, View, FactoryModule {
     static let sectionItemBackgroundView = ReusableView<VehicleListViewSectionItemBackgroundView>()
     static let sectionBackgroundView = ReusableView<CollectionBackgroundView>()
   }
+  let searchBarView = SearchBarView()
   let activityIndicatorView = UIActivityIndicatorView(style: .gray)
   let collectionView = UICollectionView(
     frame: .zero,
@@ -38,7 +41,6 @@ final class VehicleListViewController: BaseViewController, View, FactoryModule {
     $0.register(Reusable.sectionBackgroundView, kind: UICollectionElementKindSectionBackground)
     $0.register(Reusable.sectionItemBackgroundView, kind: UICollectionElementKindItemBackground)
   }
-  
   let toolbarView = ToolbarView()
   
   fileprivate lazy var dataSource = self.createDataSource()
@@ -80,13 +82,44 @@ final class VehicleListViewController: BaseViewController, View, FactoryModule {
     super.viewDidLoad()
     self.view.backgroundColor = .white
     self.view.addSubview(self.collectionView)
+    self.view.addSubview(self.searchBarView)
     self.view.addSubview(self.toolbarView)
     self.view.addSubview(self.activityIndicatorView)
+    self.setUpToAdjustInsetWhenKeyboardUpOrDown()
   }
-  
+
+  private func setUpToAdjustInsetWhenKeyboardUpOrDown() {
+    let tapGesture = UITapGestureRecognizer()
+    self.view.addGestureRecognizer(tapGesture)
+    tapGesture.rx.event.map { _ in }
+      .subscribe(onNext: { [weak self] in
+        self?.view.endEditing(true)
+      })
+      .disposed(by: self.disposeBag)
+    
+    RxKeyboard.instance.visibleHeight
+      .drive(onNext: { [weak self] keyboardVisibleHeight in
+        guard let self = self else { return }
+        self.view.setNeedsLayout()
+        UIView.animate(withDuration: 0) {
+          var bottomInset = keyboardVisibleHeight > 0 ? self.toolbarView.height : 0
+          bottomInset += self.view.safeAreaInsets.bottom
+          self.collectionView.contentInset.bottom = keyboardVisibleHeight - bottomInset
+          self.collectionView.scrollIndicatorInsets.bottom = self.collectionView.contentInset.bottom
+          self.view.layoutIfNeeded()
+        }
+      })
+      .disposed(by: self.disposeBag)
+  }
+
   override func setupConstraints() {
+    self.searchBarView.snp.makeConstraints { make in
+      make.top.equalTo(self.view.safeAreaLayoutGuide.snp.top)
+      make.left.right.equalToSuperview()
+    }
     self.collectionView.snp.makeConstraints { make in
-      make.top.left.right.equalToSuperview()
+      make.top.equalTo(self.searchBarView.snp.bottom)
+      make.left.right.equalToSuperview()
     }
     self.toolbarView.snp.makeConstraints { make in
       make.top.equalTo(self.collectionView.snp.bottom)
@@ -103,6 +136,13 @@ final class VehicleListViewController: BaseViewController, View, FactoryModule {
       .map { Reactor.Action.refresh }
       .bind(to: reactor.action)
       .disposed(by: self.disposeBag)
+    
+    self.searchBarView.rx.text.filterNil()
+      .skip(1)
+      .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
+      .map { Reactor.Action.updateQuery($0) }
+      .bind(to: reactor.action)
+      .disposed(by: disposeBag)
     
     reactor.state.map { $0.sections }
       .bind(to: self.collectionView.rx.items(dataSource: self.dataSource))
