@@ -102,9 +102,11 @@ final class VehicleListViewController: BaseViewController, View, FactoryModule {
         guard let self = self else { return }
         self.view.setNeedsLayout()
         UIView.animate(withDuration: 0) {
-          var bottomInset = keyboardVisibleHeight > 0 ? self.toolbarView.height : 0
-          bottomInset += self.view.safeAreaInsets.bottom
-          self.collectionView.contentInset.bottom = keyboardVisibleHeight - bottomInset
+          if keyboardVisibleHeight > 0 {
+            self.collectionView.contentInset.bottom = keyboardVisibleHeight - (self.toolbarView.height + self.view.safeAreaInsets.bottom)
+          } else {
+            self.collectionView.contentInset.bottom = 0
+          }
           self.collectionView.scrollIndicatorInsets.bottom = self.collectionView.contentInset.bottom
           self.view.layoutIfNeeded()
         }
