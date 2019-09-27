@@ -1,5 +1,5 @@
 ## Eber
-Real time garbage vehicle tracking app.
+Real time vehicle tracking app.
 
 ## Features
 * Using [ReactorKit](https://github.com/devxoul/ReactorKit)
