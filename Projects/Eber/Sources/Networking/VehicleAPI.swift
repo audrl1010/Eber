@@ -10,7 +10,7 @@ import Moya
 enum VehicleAPI {
   case vehicles
   case favorite(vehicleIdx: Int)
-  case unfavorite(vehicleIndex: Int)
+  case unfavorite(vehicleIdx: Int)
 }
 
 extension VehicleAPI: TargetType {
@@ -53,13 +53,13 @@ extension VehicleAPI: TargetType {
     case .favorite:
       return .requestParameters(
         parameters: ["status": true],
-        encoding: URLEncoding.default
+        encoding: URLEncoding(boolEncoding: .literal)
       )
       
     case .unfavorite:
       return .requestParameters(
         parameters: ["status": false],
-        encoding: URLEncoding.default
+        encoding: URLEncoding(boolEncoding: .literal)
       )
     }
   }
