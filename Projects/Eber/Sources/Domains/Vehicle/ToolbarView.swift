@@ -14,8 +14,8 @@ class ToolbarView: UIView {
     
     static let containerViewBottom = 44.f
     
-    static let menuButtonViewLeft = 19.f
-    static let menuButtonViewTop = 22.f
+    static let menuButtonViewLeft = 16.f
+    static let menuButtonViewTop = 15.f
     static let menuButtonViewWidth = 26.f
     static let menuButtonViewHeight = 26.f
   }
