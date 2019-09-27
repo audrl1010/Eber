@@ -18,11 +18,11 @@ extension AppDependency {
   
   static func resolve() -> AppDependency {
     let accessTokenStore = AccessTokenStore()
-    let plugins: [PluginType] = [
-      AuthPlugin(accessTokenStore: accessTokenStore)
-    ]
+    let authPlugin = AuthPlugin()
+    let plugins: [PluginType] = [authPlugin]
     let netwokring = Networking(plugins: plugins)
     let authService = AuthService(networking: netwokring, accessTokenStore: accessTokenStore)
+    authPlugin.authService = authService
     let alertService = AlertService()
     let vehicleService = VehicleService(networking: netwokring)
     
@@ -34,7 +34,6 @@ extension AppDependency {
     let splashViewReactorFactory = SplashViewReactor.Factory(
       dependency: .init(authService: authService)
     )
-    
     
     let favoriteButtonViewReactorFactory = VehicleFavoriteButtonViewReactor.Factory(
       dependency: .init(

@@ -38,6 +38,7 @@ final class AuthService: AuthServiceProtocol {
           self?.accessTokenStore.saveAccessToken(accessToken)
         }
       })
+      .delay(.milliseconds(100), scheduler: MainScheduler.instance)
   }
   
   func signOut() {
