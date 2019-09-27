@@ -20,7 +20,7 @@ enum VehicleFixture {
     vehicleIdx: 99,
     description: "vehicle2",
     favorite: false,
-    licenseNumber: "32-4562-423",
+    licenseNumber: "32-4562-333",
     capacity: 10
   )
 }
