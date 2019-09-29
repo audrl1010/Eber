@@ -14,7 +14,7 @@ final class VehicleListViewReactor: Reactor, FactoryModule {
   typealias SectionState = VehicleListViewSectionState
   typealias Section = VehicleListViewSection
   typealias SectionItem = VehicleListViewSection.Item
-
+  
   struct Dependency {
     let vehicleService: VehicleServiceProtocol
     let alertService: AlertServiceProtocol
@@ -23,11 +23,13 @@ final class VehicleListViewReactor: Reactor, FactoryModule {
   
   enum Action {
     case refresh
+    case toggleFavorite(vehicleIdx: Int)
     case updateQuery(String)
   }
   
   enum Mutation {
     case setVehicles([Vehicle])
+    case updateSectionItem(SectionItem, Int)
     case setSectionState(SectionState)
     case setLoading(Bool)
     case setQuery(String)
@@ -70,13 +72,48 @@ final class VehicleListViewReactor: Reactor, FactoryModule {
           // cancel previous '.updateQuery' action.
           .takeUntil(self.action.filter(Action.isUpdateQueryAction))
       ])
+      
+    case let .toggleFavorite(vehicleIdx):
+      guard !self.currentState.isLoading else { return .empty() }
+      return self.toggleFavoriteMutation(vehicleIdx: vehicleIdx)
     }
+  }
+  
+  func transform(mutation: Observable<Mutation>) -> Observable<Mutation> {
+    let fromVehicleEvent = Vehicle.event.flatMap { [weak self] event in
+      self?.mutation(from: event) ?? .empty()
+    }
+    return Observable.merge(mutation, fromVehicleEvent)
+  }
+  
+  private func mutation(from event: Vehicle.Event) -> Observable<Mutation> {
+    let state = self.currentState
+    switch event {
+    case let .updateFavorite(vehicleIdx, isFavorite):
+      guard let index = self.sectionItem(from: state, with: vehicleIdx) else { return .empty() }
+      let cellReactor = state.sectionItems[index].cellReactor
+      cellReactor.action.onNext(.updateFavorite(isFavorite))
+      let updatedSectionItem = SectionItem(cellReactor: cellReactor)
+      return .just(.updateSectionItem(updatedSectionItem, index))
+    }
+  }
+  
+  private func toggleFavoriteMutation(vehicleIdx: Int) -> Observable<Mutation> {
+    let state = self.currentState
+    guard let index = self.sectionItem(from: state, with: vehicleIdx) else { return .empty() }
+    let cellReactor = state.sectionItems[index].cellReactor
+    let isFavorite = cellReactor.currentState.isFavorite
+    if isFavorite {
+      _ = self.dependency.vehicleService.unfavorite(vehicleIdx: vehicleIdx).subscribe()
+    } else {
+      _ = self.dependency.vehicleService.favorite(vehicleIdx: vehicleIdx).subscribe()
+    }
+    return .empty()
   }
   
   private func refreshMutation() -> Observable<Mutation> {
     return self.dependency.vehicleService.vehicles()
       .asObservable()
-      .debug()
       .map { vehicles in .setVehicles(vehicles) }
       .catchError(self.errorMutation)
   }
@@ -112,6 +149,9 @@ final class VehicleListViewReactor: Reactor, FactoryModule {
       
     case let .setSectionState(sectionState):
       newState.sectionState = sectionState
+      
+    case let .updateSectionItem(sectionItem, index):
+      newState.sectionItems[index] = sectionItem
     }
     return newState
   }
@@ -122,12 +162,8 @@ final class VehicleListViewReactor: Reactor, FactoryModule {
     .map(SectionItem.init)
   }
   
-  func transform(state: Observable<State>) -> Observable<State> {
-    return state.flatMapLatest { state -> Observable<State> in
-      let cellReactors = state.sectionItems.map { $0.cellReactor }
-      let cellReactorStates = Observable.merge(cellReactors.map { $0.state.skip(1) })
-      return Observable.merge(.just(state), cellReactorStates.withLatestFrom(Observable.just(state)))
-    }
+  private func sectionItem(from state: State, with vehicleIdx: Int) -> Int? {
+    return state.sectionItems.firstIndex { $0.cellReactor.vehicle.vehicleIdx == vehicleIdx }
   }
 }
 
@@ -152,17 +188,15 @@ extension VehicleListViewReactor {
     
     func section(sectionItems: [VehicleListViewSection.Item]) -> VehicleListViewSection {
       let filteredSectionItems = sectionItems.filter { sectionItem in
-        let `query` = self.query.lowercased().removeWhitespace()
-        let licenseNumber = sectionItem.cellReactor.licenseNumber.lowercased().removeWhitespace()
-        let description = sectionItem.cellReactor.description.lowercased().removeWhitespace()
-        return licenseNumber.isMatch(of: query) || description.isMatch(of: query)
+        let vehicle = sectionItem.cellReactor.vehicle
+        return vehicle.isContain(query: query, partialMatchTargets: [\.licenseNumber, \.description])
       }
       let favoriteSectionItems = filteredSectionItems
-        .filter { $0.cellReactor.isFavorite }
+        .filter { $0.cellReactor.currentState.isFavorite }
         .sorted(by: <)
        
       let unfavoriteSectionItems = filteredSectionItems
-        .filter { !$0.cellReactor.isFavorite }
+        .filter { !$0.cellReactor.currentState.isFavorite }
         .sorted(by: <)
       return Section(items: favoriteSectionItems + unfavoriteSectionItems)
     }
@@ -171,11 +205,11 @@ extension VehicleListViewReactor {
   struct NoQueryingSectionState: VehicleListViewSectionState {
     func section(sectionItems: [VehicleListViewSection.Item]) -> VehicleListViewSection {
       let favoriteSectionItems = sectionItems
-        .filter { $0.cellReactor.isFavorite }
+        .filter { $0.cellReactor.currentState.isFavorite }
         .sorted(by: <)
        
       let unfavoriteSectionItems = sectionItems
-        .filter { !$0.cellReactor.isFavorite }
+        .filter { !$0.cellReactor.currentState.isFavorite }
         .sorted(by: <)
       return Section(items: favoriteSectionItems + unfavoriteSectionItems)
     }

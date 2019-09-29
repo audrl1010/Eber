@@ -26,15 +26,15 @@ extension VehicleListViewSection {
 
 extension VehicleListViewSection.Item: Comparable {
   static func == (lhs: VehicleListViewSection.Item, rhs: VehicleListViewSection.Item) -> Bool {
-    return lhs.cellReactor.vehicleIdx == rhs.cellReactor.vehicleIdx
+    return lhs.cellReactor.vehicle.vehicleIdx == rhs.cellReactor.vehicle.vehicleIdx
   }
   
   static func < (lhs: VehicleListViewSection.Item, rhs: VehicleListViewSection.Item) -> Bool {
-    return lhs.cellReactor.vehicleIdx < rhs.cellReactor.vehicleIdx
+    return lhs.cellReactor.vehicle.vehicleIdx < rhs.cellReactor.vehicle.vehicleIdx
   }
   
   static func > (lhs: VehicleListViewSection.Item, rhs: VehicleListViewSection.Item) -> Bool {
-    return lhs.cellReactor.vehicleIdx > rhs.cellReactor.vehicleIdx
+    return lhs.cellReactor.vehicle.vehicleIdx > rhs.cellReactor.vehicle.vehicleIdx
   }
 }
 

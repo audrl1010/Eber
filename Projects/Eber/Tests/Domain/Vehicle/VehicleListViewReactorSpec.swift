@@ -21,16 +21,7 @@ class VehicleListViewReactorSpec: QuickSpec {
     beforeEach {
       vehicleService = VehicleServiceStub()
       let alertService = AlertServiceStub()
-      
-      let favoriteButtonViewReactorFactory = VehicleFavoriteButtonViewReactor.Factory.stub(
-        vehicleService: vehicleService,
-        alertService: alertService
-      )
-      cellReactorFactory = VehicleCellReactor.Factory.stub(
-        vehicleService: vehicleService,
-        alertService: alertService,
-        favoriteButtonViewReactorFactory: favoriteButtonViewReactorFactory
-      )
+      cellReactorFactory = VehicleCellReactor.Factory()
       let factory = VehicleListViewReactor.Factory.init(
         dependency: .init(
           vehicleService: vehicleService,
@@ -62,8 +53,8 @@ class VehicleListViewReactorSpec: QuickSpec {
         Stubber.register(vehicleService.vehicles) { _ in .just(vehicles) }
         reactor.action.onNext(.refresh)
         expect(Stubber.executions(vehicleService.vehicles).count) == 1
-        expect(reactor.currentState.sectionItems[0].cellReactor.vehicleIdx) === vehicles[0].vehicleIdx
-        expect(reactor.currentState.sectionItems[1].cellReactor.vehicleIdx) === vehicles[1].vehicleIdx
+        expect(reactor.currentState.sectionItems[0].cellReactor.vehicle.vehicleIdx) === vehicles[0].vehicleIdx
+        expect(reactor.currentState.sectionItems[1].cellReactor.vehicle.vehicleIdx) === vehicles[1].vehicleIdx
       }
     }
     
@@ -106,6 +97,29 @@ class VehicleListViewReactorSpec: QuickSpec {
             let query = "99"
             reactor.action.onNext(.updateQuery(query))
             expect(reactor.currentState.sections[0].items.count) == 1
+          }
+        }
+      }
+      
+      context("when receives an action.toggleFavorite") {
+        it("tries to toggle favorite") {
+          Stubber.register(vehicleService.favorite) { _ in .just(()) }
+          Stubber.register(vehicleService.unfavorite) { _ in .just(()) }
+          reactor.action.onNext(.toggleFavorite(vehicleIdx: VehicleFixture.vehicle1.vehicleIdx))
+          expect(Stubber.executions(vehicleService.favorite).count) == 1
+        }
+      }
+      
+      context("when receives Vehicle.event.updateFavorite") {
+        it("sends updateFavorite action to cellReactor") {
+          reactor.currentState.sectionItems[0].cellReactor.isStubEnabled = true
+          Vehicle.event.onNext(.updateFavorite(vehicleIdx: VehicleFixture.vehicle1.vehicleIdx, isFavorite: true))
+          expect(reactor.currentState.sectionItems[0].cellReactor.stub.actions.last).to(match) {
+            if case .updateFavorite = $0 {
+              return true
+            } else {
+              return false
+            }
           }
         }
       }

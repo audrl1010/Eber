@@ -12,11 +12,11 @@ import Pure
 class VehicleCellReactor: Reactor, FactoryModule {
   
   enum Action {
-    case toggle
+    case updateFavorite(Bool)
   }
   
-  struct Dependency {
-    let favoriteButtonViewReactorFactory: VehicleFavoriteButtonViewReactor.Factory
+  enum Mutation {
+    case updateFavorite(Bool)
   }
   
   struct Payload {
@@ -24,57 +24,48 @@ class VehicleCellReactor: Reactor, FactoryModule {
   }
   
   struct State {
-    var vehicleIdx: Int
     var description: String
     var licenseNumber: String
     var capacity: String
     var isFavorite: Bool
+    fileprivate var vehicle: Vehicle
   }
   
-  var vehicleIdx: Int {
-    return self.currentState.vehicleIdx
-  }
-  var isFavorite: Bool {
-    return self.currentState.isFavorite
-  }
-  var licenseNumber: String {
-    return self.currentState.licenseNumber
-  }
-  var description: String {
-    return self.currentState.description
+  var vehicle: Vehicle {
+    return self.currentState.vehicle
   }
   
   let initialState: State
   
   private let dependency: Dependency
   
-  let favoriteButtonViewReactor: VehicleFavoriteButtonViewReactor
-  
   required init(dependency: Dependency, payload: Payload) {
     defer { _ = self.state }
     self.dependency = dependency
-    self.favoriteButtonViewReactor = self.dependency.favoriteButtonViewReactorFactory.create(
-      payload: .init(vehicle: payload.vehicle)
-    )
     self.initialState = State(
-      vehicleIdx: payload.vehicle.vehicleIdx,
       description: payload.vehicle.description,
       licenseNumber: payload.vehicle.licenseNumber,
       capacity: payload.vehicle.capacity.toDecimal(),
-      isFavorite: payload.vehicle.favorite
+      isFavorite: payload.vehicle.favorite,
+      vehicle: payload.vehicle
     )
   }
   
-  func transform(state: Observable<State>) -> Observable<State> {
-    let favoriteState = self.favoriteButtonViewReactor.state.skip(1)
-      .distinctUntilChanged { $0.isFavorite }
-    
-    let newState = favoriteState.withLatestFrom(state) { favoriteState, state -> State in
-      var newState = state
-      newState.isFavorite = favoriteState.isFavorite
-      return newState
+  func mutate(action: Action) -> Observable<Mutation> {
+    switch action {
+    case let .updateFavorite(isFavorite):
+      return .just(.updateFavorite(isFavorite))
     }
-    return Observable.merge(state, newState)
+  }
+  
+  func reduce(state: State, mutation: Mutation) -> State {
+    var newState = state
+    switch mutation {
+    case let .updateFavorite(isFavorite):
+      newState.isFavorite = isFavorite
+      newState.vehicle.favorite = isFavorite
+    }
+    return newState
   }
 }
 
