@@ -29,6 +29,7 @@ Make project
 git clone https://github.com/audrl1010/Eber.git
 cd Eber
 make project
+open Eber.xcworkspace
 ```
 
 ## License
