@@ -23,6 +23,7 @@ extension AppDependency {
     let netwokring = Networking(plugins: plugins)
     let authService = AuthService(networking: netwokring, accessTokenStore: accessTokenStore)
     authPlugin.authService = authService
+    
     let alertService = AlertService()
     let vehicleService = VehicleService(networking: netwokring)
     

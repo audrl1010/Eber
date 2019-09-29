@@ -24,19 +24,27 @@ class VehicleCellReactor: Reactor, FactoryModule {
   }
   
   struct State {
+    var vehicleIdx: Int
     var description: String
-    var favorite: Bool
     var licenseNumber: String
     var capacity: String
-    
-    fileprivate var vehicle: Vehicle
+    var isFavorite: Bool
+  }
+  
+  var vehicleIdx: Int {
+    return self.currentState.vehicleIdx
+  }
+  var isFavorite: Bool {
+    return self.currentState.isFavorite
+  }
+  var licenseNumber: String {
+    return self.currentState.licenseNumber
+  }
+  var description: String {
+    return self.currentState.description
   }
   
   let initialState: State
-  
-  var vehicle: Vehicle {
-    return self.currentState.vehicle
-  }
   
   private let dependency: Dependency
   
@@ -49,12 +57,24 @@ class VehicleCellReactor: Reactor, FactoryModule {
       payload: .init(vehicle: payload.vehicle)
     )
     self.initialState = State(
+      vehicleIdx: payload.vehicle.vehicleIdx,
       description: payload.vehicle.description,
-      favorite: payload.vehicle.favorite,
       licenseNumber: payload.vehicle.licenseNumber,
       capacity: payload.vehicle.capacity.toDecimal(),
-      vehicle: payload.vehicle
+      isFavorite: payload.vehicle.favorite
     )
+  }
+  
+  func transform(state: Observable<State>) -> Observable<State> {
+    let favoriteState = self.favoriteButtonViewReactor.state.skip(1)
+      .distinctUntilChanged { $0.isFavorite }
+    
+    let newState = favoriteState.withLatestFrom(state) { favoriteState, state -> State in
+      var newState = state
+      newState.isFavorite = favoriteState.isFavorite
+      return newState
+    }
+    return Observable.merge(state, newState)
   }
 }
 

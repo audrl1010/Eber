@@ -38,7 +38,7 @@ class VehicleCellReactorSpec: QuickSpec {
     
     describe("state.favorite") {
       it("is same with the initialized parameter value") {
-        expect(reactor.currentState.favorite) == VehicleFixture.vehicle1.favorite
+        expect(reactor.currentState.isFavorite) == VehicleFixture.vehicle1.favorite
       }
     }
     

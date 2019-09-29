@@ -48,8 +48,11 @@ class VehicleListViewReactorSpec: QuickSpec {
       it("has empty query") {
         expect(reactor.currentState.query) == ""
       }
-      it("has empty sections") {
-        expect(reactor.currentState.sections).to(beEmpty())
+      it("has empty section items") {
+        expect(reactor.currentState.sections[0].items).to(beEmpty())
+      }
+      it("has no querying section state") {
+        expect(reactor.currentState.sectionState).to(beAKindOf(VehicleListViewReactor.NoQueryingSectionState.self))
       }
     }
     
@@ -59,8 +62,8 @@ class VehicleListViewReactorSpec: QuickSpec {
         Stubber.register(vehicleService.vehicles) { _ in .just(vehicles) }
         reactor.action.onNext(.refresh)
         expect(Stubber.executions(vehicleService.vehicles).count) == 1
-        expect(reactor.currentState.sectionItems[0].cellReactor.vehicle.vehicleIdx) === vehicles[0].vehicleIdx
-        expect(reactor.currentState.sectionItems[1].cellReactor.vehicle.vehicleIdx) === vehicles[1].vehicleIdx
+        expect(reactor.currentState.sectionItems[0].cellReactor.vehicleIdx) === vehicles[0].vehicleIdx
+        expect(reactor.currentState.sectionItems[1].cellReactor.vehicleIdx) === vehicles[1].vehicleIdx
       }
     }
     
@@ -76,6 +79,13 @@ class VehicleListViewReactorSpec: QuickSpec {
           let query = "vehicle"
           reactor.action.onNext(.updateQuery(query))
           expect(reactor.currentState.query) === query
+        }
+        context("when query is empty string") {
+          it("has sectionItems") {
+            let query = ""
+            reactor.action.onNext(.updateQuery(query))
+            expect(reactor.currentState.sections[0].items.count) == 2
+          }
         }
         context("when has query = '333'") {
           it("has filtered 2 sectionItems") {
@@ -96,6 +106,25 @@ class VehicleListViewReactorSpec: QuickSpec {
             let query = "99"
             reactor.action.onNext(.updateQuery(query))
             expect(reactor.currentState.sections[0].items.count) == 1
+          }
+        }
+      }
+    }
+    
+    describe("state.sectionState") {
+      context("while querying vehicles") {
+        context("when query is empty string") {
+          it("is NoQueryingSectionState") {
+            let query = ""
+            reactor.action.onNext(.updateQuery(query))
+            expect(reactor.currentState.sectionState).to(beAKindOf(VehicleListViewReactor.NoQueryingSectionState.self))
+          }
+        }
+        context("when query is not empty string") {
+          it("is QueryingSectionState") {
+            let query = "vehicle"
+            reactor.action.onNext(.updateQuery(query))
+            expect(reactor.currentState.sectionState).to(beAKindOf(VehicleListViewReactor.QueryingSectionState.self))
           }
         }
       }
