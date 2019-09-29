@@ -8,14 +8,14 @@
 import UIKit
 import ReactorKit
 
-
 final class VehicleCell: BaseCollectionViewCell, View {
-
+  
   typealias CellReactor = VehicleCellReactor
   
   enum Metric {
     static let licenseNumberLabelTop = 9.f
-    static let favoriteButtonViewTop = 8.f
+    static let favoriteButtonTop = 8.f
+    static let favoriteButtonSize = 17.f
     static let capacityLabelTop = 10.f
     static let capacityLabelLeft = 8.f
   }
@@ -36,7 +36,9 @@ final class VehicleCell: BaseCollectionViewCell, View {
     $0.font = Font.licenseNumberLabel
     $0.textColor = .black_87
   }
-  let favoriteButtonView = VehicleFavoriteButtonView()
+  let favoriteButton = UIButton().then {
+    $0.touchAreaInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+  }
   let capacityLabel = UILabel().then {
     $0.font = Font.capacityLabel
     $0.textColor = .black_60
@@ -49,7 +51,7 @@ final class VehicleCell: BaseCollectionViewCell, View {
   override init(frame: CGRect) {
     super.init(frame: frame)
     self.contentView.addSubview(self.descriptionLabel)
-    self.contentView.addSubview(self.favoriteButtonView)
+    self.contentView.addSubview(self.favoriteButton)
     self.contentView.addSubview(self.licenseNumberLabel)
     self.contentView.addSubview(self.capacityLabel)
     self.contentView.addGestureRecognizer(self.tapGestureRecognizer)
@@ -62,8 +64,6 @@ final class VehicleCell: BaseCollectionViewCell, View {
   // MARK: Configuring
   
   func bind(reactor: CellReactor) {
-    self.favoriteButtonView.reactor = reactor.favoriteButtonViewReactor
-    
     reactor.state.map { _ in }
     .bind(to: self.rx.setNeedsLayout)
     .disposed(by: self.disposeBag)
@@ -82,6 +82,12 @@ final class VehicleCell: BaseCollectionViewCell, View {
       .distinctUntilChanged()
       .map { "적재용량: \($0)t"}
       .bind(to: self.capacityLabel.rx.text)
+      .disposed(by: self.disposeBag)
+    
+    reactor.state.map { $0.isFavorite }
+      .distinctUntilChanged()
+      .map { $0 ? R.image.favorite() : R.image.unfavorite() }
+      .bind(to: self.favoriteButton.rx.image(for: .normal))
       .disposed(by: self.disposeBag)
   }
   
@@ -103,12 +109,13 @@ final class VehicleCell: BaseCollectionViewCell, View {
     self.licenseNumberLabel.top = self.descriptionLabel.bottom + Metric.licenseNumberLabelTop
     self.licenseNumberLabel.width = self.bounds.width
     
-    self.favoriteButtonView.sizeToFit()
-    self.favoriteButtonView.top = self.licenseNumberLabel.bottom + Metric.favoriteButtonViewTop
+    self.favoriteButton.top = self.licenseNumberLabel.bottom + Metric.favoriteButtonTop
+    self.favoriteButton.width = Metric.favoriteButtonSize
+    self.favoriteButton.height = Metric.favoriteButtonSize
     
     self.capacityLabel.sizeToFit()
     self.capacityLabel.top = self.licenseNumberLabel.bottom + Metric.capacityLabelTop
-    self.capacityLabel.left = self.favoriteButtonView.right + Metric.capacityLabelLeft
+    self.capacityLabel.left = self.favoriteButton.right + Metric.capacityLabelLeft
     self.capacityLabel.width = self.bounds.width - self.capacityLabel.left
   }
   

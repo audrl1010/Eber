@@ -23,6 +23,7 @@ extension AppDependency {
     let netwokring = Networking(plugins: plugins)
     let authService = AuthService(networking: netwokring, accessTokenStore: accessTokenStore)
     authPlugin.authService = authService
+    
     let alertService = AlertService()
     let vehicleService = VehicleService(networking: netwokring)
     
@@ -34,19 +35,8 @@ extension AppDependency {
     let splashViewReactorFactory = SplashViewReactor.Factory(
       dependency: .init(authService: authService)
     )
-    
-    let favoriteButtonViewReactorFactory = VehicleFavoriteButtonViewReactor.Factory(
-      dependency: .init(
-        vehicleService: vehicleService,
-        alertService: alertService
-      )
-    )
     let vehicleListViewControllerFactory = VehicleListViewController.Factory()
-    let vehicleCellReactorFactory = VehicleCellReactor.Factory(
-      dependency: .init(
-        favoriteButtonViewReactorFactory: favoriteButtonViewReactorFactory
-      )
-    )
+    let vehicleCellReactorFactory = VehicleCellReactor.Factory()
     let vehicleListViewReactorFactory = VehicleListViewReactor.Factory(
       dependency: VehicleListViewReactor.Dependency(
         vehicleService: vehicleService,

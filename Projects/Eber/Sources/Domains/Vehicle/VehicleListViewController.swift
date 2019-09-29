@@ -56,9 +56,15 @@ final class VehicleListViewController: BaseViewController, View, FactoryModule {
   
   private func createDataSource() -> RxCollectionViewSectionedReloadDataSource<Section> {
     return .init(
-      configureCell: { dataSource, collectionView, indexPath, sectionItem in
+      configureCell: { [weak self] dataSource, collectionView, indexPath, sectionItem in
+        guard let self = self, let reactor = self.reactor else { return UICollectionViewCell() }
         let cell = collectionView.dequeue(Reusable.vehicleCell, for: indexPath)
         cell.reactor = sectionItem.cellReactor
+        let vehicleIdx = sectionItem.cellReactor.vehicle.vehicleIdx
+        cell.favoriteButton.rx.tap
+          .map { Reactor.Action.toggleFavorite(vehicleIdx: vehicleIdx) }
+          .bind(to: reactor.action)
+          .disposed(by: cell.disposeBag)
         return cell
       },
       configureSupplementaryView: { dataSource, collectionView, kind, indexPath in
@@ -136,6 +142,7 @@ final class VehicleListViewController: BaseViewController, View, FactoryModule {
   func bind(reactor: Reactor) {
     self.rx.viewDidLoad
       .map { Reactor.Action.refresh }
+      .debug()
       .bind(to: reactor.action)
       .disposed(by: self.disposeBag)
     

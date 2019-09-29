@@ -22,15 +22,7 @@ final class VehicleListViewControllerSpec: QuickSpec {
       let vehicleService = VehicleServiceStub()
       let alertService = AlertServiceStub()
       
-      let buttonViewReactorFactory = VehicleFavoriteButtonViewReactor.Factory.stub(
-        vehicleService: vehicleService,
-        alertService: alertService
-      )
-      cellReactorFactory = VehicleCellReactor.Factory.stub(
-        vehicleService: vehicleService,
-        alertService: alertService,
-        favoriteButtonViewReactorFactory: buttonViewReactorFactory
-      )
+      cellReactorFactory = VehicleCellReactor.Factory()
       let factory = VehicleListViewReactor.Factory(
         dependency: .init(
           vehicleService: vehicleService,
@@ -91,12 +83,31 @@ final class VehicleListViewControllerSpec: QuickSpec {
       }
     }
     
+    context("when cell`favorite button taps") {
+      it("sends toggleFavorite action to reactor") {
+        let sectionItems = [VehicleFixture.vehicle1, VehicleFixture.vehicle2]
+          .map(cellReactorFactory.create)
+          .map(VehicleListViewSection.Item.init)
+        
+        reactor.stub.state.value.sectionItems = sectionItems
+        viewController.collectionView.cell(VehicleCell.self, at: 0, 0)?.favoriteButton.sendActions(for: .touchUpInside)
+        expect(reactor.stub.actions.last).to(match) {
+          if case .toggleFavorite = $0 {
+            return true
+          } else {
+            return false
+          }
+        }
+      }
+    }
+    
     context("when sections have vehicles") {
       it("has vehicle cells") {
         let sectionItems = [VehicleFixture.vehicle1, VehicleFixture.vehicle2]
           .map(cellReactorFactory.create)
           .map(VehicleListViewSection.Item.init)
-        reactor.stub.state.value.sections = [VehicleListViewSection(items: sectionItems)]
+        
+        reactor.stub.state.value.sectionItems = sectionItems
         expect(viewController.collectionView.cell(VehicleCell.self, at: 0, 0)?.reactor) === sectionItems[0].cellReactor
         expect(viewController.collectionView.cell(VehicleCell.self, at: 0, 1)?.reactor) === sectionItems[1].cellReactor
       }

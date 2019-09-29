@@ -16,17 +16,7 @@ class VehicleCellReactorSpec: QuickSpec {
     var reactor: VehicleCellReactor!
     
     beforeEach {
-      let vehicleService = VehicleServiceStub()
-      let alertService = AlertServiceStub()
-      let favoriteButtonViewReactorFactory = VehicleFavoriteButtonViewReactor.Factory.stub(
-        vehicleService: vehicleService,
-        alertService: alertService
-      )
-      let cellReactorFactory = VehicleCellReactor.Factory.stub(
-        vehicleService: vehicleService,
-        alertService: alertService,
-        favoriteButtonViewReactorFactory: favoriteButtonViewReactorFactory
-      )
+      let cellReactorFactory = VehicleCellReactor.Factory()
       reactor = cellReactorFactory.create(payload: .init(vehicle: VehicleFixture.vehicle1))
     }
     
@@ -36,9 +26,9 @@ class VehicleCellReactorSpec: QuickSpec {
       }
     }
     
-    describe("state.favorite") {
+    describe("state.isFavorite") {
       it("is same with the initialized parameter value") {
-        expect(reactor.currentState.favorite) == VehicleFixture.vehicle1.favorite
+        expect(reactor.currentState.isFavorite) == VehicleFixture.vehicle1.favorite
       }
     }
     

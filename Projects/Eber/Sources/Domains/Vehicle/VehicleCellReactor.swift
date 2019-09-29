@@ -12,11 +12,11 @@ import Pure
 class VehicleCellReactor: Reactor, FactoryModule {
   
   enum Action {
-    case toggle
+    case updateFavorite(Bool)
   }
   
-  struct Dependency {
-    let favoriteButtonViewReactorFactory: VehicleFavoriteButtonViewReactor.Factory
+  enum Mutation {
+    case updateFavorite(Bool)
   }
   
   struct Payload {
@@ -25,36 +25,47 @@ class VehicleCellReactor: Reactor, FactoryModule {
   
   struct State {
     var description: String
-    var favorite: Bool
     var licenseNumber: String
     var capacity: String
-    
+    var isFavorite: Bool
     fileprivate var vehicle: Vehicle
   }
-  
-  let initialState: State
   
   var vehicle: Vehicle {
     return self.currentState.vehicle
   }
   
-  private let dependency: Dependency
+  let initialState: State
   
-  let favoriteButtonViewReactor: VehicleFavoriteButtonViewReactor
+  private let dependency: Dependency
   
   required init(dependency: Dependency, payload: Payload) {
     defer { _ = self.state }
     self.dependency = dependency
-    self.favoriteButtonViewReactor = self.dependency.favoriteButtonViewReactorFactory.create(
-      payload: .init(vehicle: payload.vehicle)
-    )
     self.initialState = State(
       description: payload.vehicle.description,
-      favorite: payload.vehicle.favorite,
       licenseNumber: payload.vehicle.licenseNumber,
       capacity: payload.vehicle.capacity.toDecimal(),
+      isFavorite: payload.vehicle.favorite,
       vehicle: payload.vehicle
     )
+  }
+  
+  func mutate(action: Action) -> Observable<Mutation> {
+    switch action {
+    case let .updateFavorite(isFavorite):
+      return .just(.updateFavorite(isFavorite))
+    }
+  }
+  
+  func reduce(state: State, mutation: Mutation) -> State {
+    var newState = state
+    switch mutation {
+    case let .updateFavorite(isFavorite):
+      newState.isFavorite = isFavorite
+      newState.vehicle.favorite = isFavorite
+    }
+    return newState
   }
 }
 

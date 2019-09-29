@@ -21,16 +21,7 @@ class VehicleListViewReactorSpec: QuickSpec {
     beforeEach {
       vehicleService = VehicleServiceStub()
       let alertService = AlertServiceStub()
-      
-      let favoriteButtonViewReactorFactory = VehicleFavoriteButtonViewReactor.Factory.stub(
-        vehicleService: vehicleService,
-        alertService: alertService
-      )
-      cellReactorFactory = VehicleCellReactor.Factory.stub(
-        vehicleService: vehicleService,
-        alertService: alertService,
-        favoriteButtonViewReactorFactory: favoriteButtonViewReactorFactory
-      )
+      cellReactorFactory = VehicleCellReactor.Factory()
       let factory = VehicleListViewReactor.Factory.init(
         dependency: .init(
           vehicleService: vehicleService,
@@ -48,8 +39,11 @@ class VehicleListViewReactorSpec: QuickSpec {
       it("has empty query") {
         expect(reactor.currentState.query) == ""
       }
-      it("has empty sections") {
-        expect(reactor.currentState.sections).to(beEmpty())
+      it("has empty section items") {
+        expect(reactor.currentState.sections[0].items).to(beEmpty())
+      }
+      it("has no querying section state") {
+        expect(reactor.currentState.sectionState).to(beAKindOf(VehicleListViewReactor.NoQueryingSectionState.self))
       }
     }
     
@@ -77,6 +71,13 @@ class VehicleListViewReactorSpec: QuickSpec {
           reactor.action.onNext(.updateQuery(query))
           expect(reactor.currentState.query) === query
         }
+        context("when query is empty string") {
+          it("has sectionItems") {
+            let query = ""
+            reactor.action.onNext(.updateQuery(query))
+            expect(reactor.currentState.sections[0].items.count) == 2
+          }
+        }
         context("when has query = '333'") {
           it("has filtered 2 sectionItems") {
             let query = "333"
@@ -96,6 +97,48 @@ class VehicleListViewReactorSpec: QuickSpec {
             let query = "99"
             reactor.action.onNext(.updateQuery(query))
             expect(reactor.currentState.sections[0].items.count) == 1
+          }
+        }
+      }
+      
+      context("when receives an action.toggleFavorite") {
+        it("tries to toggle favorite") {
+          Stubber.register(vehicleService.favorite) { _ in .just(()) }
+          Stubber.register(vehicleService.unfavorite) { _ in .just(()) }
+          reactor.action.onNext(.toggleFavorite(vehicleIdx: VehicleFixture.vehicle1.vehicleIdx))
+          expect(Stubber.executions(vehicleService.favorite).count) == 1
+        }
+      }
+      
+      context("when receives Vehicle.event.updateFavorite") {
+        it("sends updateFavorite action to cellReactor") {
+          reactor.currentState.sectionItems[0].cellReactor.isStubEnabled = true
+          Vehicle.event.onNext(.updateFavorite(vehicleIdx: VehicleFixture.vehicle1.vehicleIdx, isFavorite: true))
+          expect(reactor.currentState.sectionItems[0].cellReactor.stub.actions.last).to(match) {
+            if case .updateFavorite = $0 {
+              return true
+            } else {
+              return false
+            }
+          }
+        }
+      }
+    }
+    
+    describe("state.sectionState") {
+      context("while querying vehicles") {
+        context("when query is empty string") {
+          it("is NoQueryingSectionState") {
+            let query = ""
+            reactor.action.onNext(.updateQuery(query))
+            expect(reactor.currentState.sectionState).to(beAKindOf(VehicleListViewReactor.NoQueryingSectionState.self))
+          }
+        }
+        context("when query is not empty string") {
+          it("is QueryingSectionState") {
+            let query = "vehicle"
+            reactor.action.onNext(.updateQuery(query))
+            expect(reactor.currentState.sectionState).to(beAKindOf(VehicleListViewReactor.QueryingSectionState.self))
           }
         }
       }
